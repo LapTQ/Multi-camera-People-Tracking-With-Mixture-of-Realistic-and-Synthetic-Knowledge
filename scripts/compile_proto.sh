@@ -1,0 +1,1 @@
+python3 -m grpc_tools.protoc -Isrc/protos/python/feature_extraction=src/protos --python_out=. --pyi_out=. --grpc_python_out=. src/protos/feature_extraction.proto

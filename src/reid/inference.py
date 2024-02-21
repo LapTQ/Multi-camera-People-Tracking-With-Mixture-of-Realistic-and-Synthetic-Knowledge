@@ -1,3 +1,12 @@
+from pathlib import Path
+import sys
+
+HERE = Path(__file__).parent
+ROOT_DIR = HERE.parent.parent
+
+sys.path.append(str(ROOT_DIR))
+
+
 import os
 from processor.trainers.do_train_vehicle_reid import Vehicle_Reid
 from metrics.r1_mAP import R1_mAP, R1_mAP_reranking
@@ -23,7 +32,8 @@ def inference(cfg):
     # print(cfg["MODEL"])
     checkpoint_path = None if cfg["CHECKPOINT_PATH"] == "" else cfg["CHECKPOINT_PATH"]
 
-    train_loader, val_loader, num_query, num_classes = make_data_loader(cfg)
+    # train_loader, val_loader, num_query, num_classes = make_data_loader(cfg)
+    num_classes = 726
     model = build_model(cfg, num_classes)  # num_classes = 726
 
     # loss_fn = make_loss(cfg, num_classes)

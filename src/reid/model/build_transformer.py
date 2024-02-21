@@ -57,8 +57,8 @@ class build_transformer(nn.Module):
             drop_path_rate=cfg["MODEL"]["DROP_PATH"],
         )
 
-        if pretrain_choice == "imagenet":
-            self.base.load_param(model_path)
+        if pretrain_choice != 'scratch' and pretrain_choice == "imagenet":
+            self.load_param(model_path)
             print("Loading pretrained ImageNet model......from {}".format(model_path))
 
         self.gap = nn.AdaptiveAvgPool2d(1)
@@ -130,7 +130,7 @@ class build_transformer(nn.Module):
         self.bottleneck.bias.requires_grad_(False)
         self.bottleneck.apply(weights_init_kaiming)
 
-        if pretrain_choice == "self":
+        if pretrain_choice != 'scratch' and pretrain_choice == "self":
             param_dict = torch.load(model_path, map_location="cpu")
             for i in param_dict:
                 if "classifier" in i:
@@ -160,13 +160,16 @@ class build_transformer(nn.Module):
                 return global_feat
 
     def load_param(self, trained_path):
-        param_dict = torch.load(trained_path, map_location="cpu")
+        print("Loading pretrained model from {}".format(trained_path))
+        param_dict = torch.load(trained_path, map_location="cpu")['state_dict']
         for i in param_dict:
             if "classifier" in i or "arcface" in i or "gap" in i:
                 continue
+            if i.replace("module.", "").lstrip('model.') not in self.state_dict():
+                continue
             # self.state_dict()[i].copy_(param_dict[i])
-            self.state_dict()[i.replace("module.", "")].copy_(param_dict[i])
-        print("Loading pretrained model from {}".format(trained_path))
+            self.state_dict()[i.replace("module.", "").lstrip('model.')].copy_(param_dict[i])
+            print('Updating weight:', i)
 
 
 def shuffle_unit(features, shift, group, begin=1):
@@ -228,8 +231,8 @@ class build_transformer_local(nn.Module):
             drop_path_rate=cfg["MODEL"]["DROP_PATH"],
         )
 
-        if pretrain_choice == "imagenet":
-            self.base.load_param(model_path)
+        if pretrain_choice != 'scratch' and pretrain_choice == "imagenet":
+            self.load_param(model_path)
             print("Loading pretrained ImageNet model......from {}".format(model_path))
 
         block = self.base.blocks[-1]
@@ -418,16 +421,22 @@ class build_transformer_local(nn.Module):
                 )
 
     def load_param(self, trained_path):
-        param_dict = torch.load(trained_path)
+        print('Loading pretrained model from {}'.format(trained_path))
+        param_dict = torch.load(trained_path)['state_dict']
         for i in param_dict:
-            self.state_dict()[i.replace("module.", "")].copy_(param_dict[i])
-        print("Loading pretrained model from {}".format(trained_path))
+            if i.replace("module.", "").lstrip('model.') not in self.state_dict():
+                continue
+            self.state_dict()[i.replace("module.", "").lstrip('model.')].copy_(param_dict[i])
+            print('Updating weight:', i)
 
     def load_param_finetune(self, model_path):
+        print("Loading pretrained model for finetuning from {}".format(model_path))
         param_dict = torch.load(model_path)
         for i in param_dict:
-            self.state_dict()[i].copy_(param_dict[i])
-        print("Loading pretrained model for finetuning from {}".format(model_path))
+            if i.lstrip('model.') not in self.state_dict():
+                continue
+            self.state_dict()[i.lstrip('model.')].copy_(param_dict[i])
+            print('Updating weight:', i)
 
 
 def weights_init_kaiming(m):

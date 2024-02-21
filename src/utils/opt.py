@@ -74,6 +74,9 @@ class Opts(ArgumentParser):
         self.add_argument(
             "-o", "--opt", nargs="+", help="override configuration options"
         )
+        self.add_argument("--port", type=int, help="Port number")
+        self.add_argument("--device", type=int)
+        self.add_argument("--pretrained_num_classes", type=int)
 
     def parse_args(self, argv=None):
         args = super(Opts, self).parse_args(argv)
@@ -81,6 +84,7 @@ class Opts(ArgumentParser):
         args.opt = self._parse_opt(args.opt)
         if args.config is not "DEFAULT":
             _config = Config(args.config)
+            print(_config)
             self.config = deep_update(self.config, _config)
         # print(self.config)
         config = self.override(self.config, args.opt)

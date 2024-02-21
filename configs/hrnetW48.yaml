@@ -1,7 +1,8 @@
 MODEL:
   PRETRAIN_CHOICE: 'imagenet'
-  PRETRAIN_PATH: '/mnt/ssd8tb/quang/pretrain/hrnetv2_w32_imagenet_pretrained.pth'
-  PRETRAIN_NAME: 'HRNet_W48_C_ssld_pretrained.pth'
+  PRETRAIN_ROOT: 'weights'
+  PRETRAIN_PATH: 'weights/HrNet_epoch_3.ckpt'
+  PRETRAIN_NAME: 'HrNet_epoch_3.ckpt'
   METRIC_LOSS_TYPE: 'triplet'
   IF_LABELSMOOTH: 'off'
   IF_WITH_CENTER: 'no'

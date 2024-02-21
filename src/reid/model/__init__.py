@@ -6,7 +6,7 @@ import os
 def build_model(cfg, num_classes, camera_num=0, view_num=0):
     print(cfg["MODEL"])
     cfg["MODEL"]["PRETRAIN_PATH"] = os.path.join(
-        cfg["PRETRAIN_ROOT"], cfg["MODEL"]["PRETRAIN_NAME"]
+        cfg["MODEL"]["PRETRAIN_ROOT"], cfg["MODEL"]["PRETRAIN_NAME"]
     )
     if cfg["MODEL"]["NAME"] == "transformer":
         model = build_transformer(num_classes, camera_num, view_num, cfg=cfg)

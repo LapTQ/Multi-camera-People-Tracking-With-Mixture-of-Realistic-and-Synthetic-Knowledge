@@ -171,7 +171,7 @@ class Baseline(nn.Module):
             self.base = HighResolutionNet(cfg)
             print("using cls_hrnet as a backbone")
 
-        if pretrain_choice == "imagenet":
+        if pretrain_choice != 'scratch' and pretrain_choice == "imagenet":
             if model_name == "Resnet_CBAM":
                 checkpoint = torch.load(model_path)
                 state_dict = checkpoint["state_dict"]
