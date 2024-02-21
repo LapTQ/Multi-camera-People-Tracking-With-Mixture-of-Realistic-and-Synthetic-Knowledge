@@ -20,6 +20,7 @@ import argparse
 import socket
 from pytorch_lightning.trainer.trainer import Trainer
 import torch
+import numpy as np
 
 
 class FeatureExtractionServicer(feature_extraction_pb2_grpc.FeatureExtractorServicer):
@@ -36,17 +37,14 @@ class FeatureExtractionServicer(feature_extraction_pb2_grpc.FeatureExtractorServ
         self.model.to(self.device)
         self.model.eval()
 
-        self.n_called = 0
-
 
     def predict(self, request, context):
         img_batch = pickle.loads(request.imgs_pkl)
 
         with torch.no_grad():
-            self.n_called += 1
             img_batch = img_batch.to(self.device)
 
-            print(f'[{self.n_called}th runs] Processing batch of size', img_batch.size(0))
+            print(f'[{np.random.randint(1, 10)} :-D] Processing batch of size', img_batch.size(0))
             features = self.model(img_batch).cpu()
 
         features_pkl = pickle.dumps(features)

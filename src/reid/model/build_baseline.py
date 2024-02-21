@@ -180,6 +180,8 @@ class Baseline(nn.Module):
                     name = k[7:]  # remove `module.`
                     new_state_dict[name] = v
                 self.base.load_state_dict(new_state_dict)
+            elif "cls_hrnet" in model_name:
+                self.load_param(model_path)
             else:
                 self.base.load_param(model_path)
             print("Loading pretrained ImageNet model......")
@@ -226,11 +228,12 @@ class Baseline(nn.Module):
                 return global_feat
 
     def load_param(self, trained_path):
-        param_dict = torch.load(trained_path)
+        param_dict = torch.load(trained_path)['state_dict']
         for i in param_dict:
             if "classifier" in i:
                 continue
-            self.state_dict()[i].copy_(param_dict[i])
+            self.state_dict()[i.lstrip('model.')].copy_(param_dict[i])
+            print('Updating weight:', i)
 
 
 model_urls = {
