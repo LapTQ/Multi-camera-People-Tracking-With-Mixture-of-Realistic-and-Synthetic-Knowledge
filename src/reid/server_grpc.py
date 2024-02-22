@@ -10,6 +10,7 @@ from src.protos.python.feature_extraction import feature_extraction_pb2_grpc, fe
 from dataset_processing import make_inference_data_loader, make_data_loader
 from model import *
 import src.utils.utils as util
+from src.reid.dataset_processing.transforms import build_transforms
 
 # =============================================================================
 
@@ -21,6 +22,7 @@ import socket
 from pytorch_lightning.trainer.trainer import Trainer
 import torch
 import numpy as np
+from PIL import Image
 
 
 class FeatureExtractionServicer(feature_extraction_pb2_grpc.FeatureExtractorServicer):
@@ -37,11 +39,16 @@ class FeatureExtractionServicer(feature_extraction_pb2_grpc.FeatureExtractorServ
         self.model.to(self.device)
         self.model.eval()
 
+        self.transforms = build_transforms(cfg, is_train=False)
+        
 
     def predict(self, request, context):
         img_batch = pickle.loads(request.imgs_pkl)
 
         with torch.no_grad():
+            img_batch = img_batch.numpy()
+            img_batch = [Image.fromarray(img) for img in img_batch]
+            img_batch = torch.stack([self.transforms(img) for img in img_batch])
             img_batch = img_batch.to(self.device)
 
             print(f'[{np.random.randint(1, 10)} :-D] Processing batch of size', img_batch.size(0))
